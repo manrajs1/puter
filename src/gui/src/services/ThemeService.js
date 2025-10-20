@@ -107,6 +107,48 @@ export class ThemeService extends Service {
 
     get (key) { return this.state[key]; }
 
+    /**
+     * Calculate appropriate sidebar text color based on theme lightness
+     * Ensures WCAG AA compliance (4.5:1 contrast ratio minimum)
+     * @param {number} lightness - Theme lightness value (0-100)
+     * @returns {string} - Hex color value for sidebar text
+     */
+    calculateSidebarTextColor(lightness) {
+        // For very light backgrounds (lightness > 70%), use dark text
+        if (lightness > 70) {
+            return '#2c2c2c'; // Dark gray for high contrast on light backgrounds
+        }
+        // For medium backgrounds (lightness 40-70%), use medium contrast text
+        else if (lightness > 40) {
+            return '#5a5a5a'; // Medium gray for balanced contrast
+        }
+        // For dark backgrounds (lightness < 40%), use light text
+        else {
+            return '#e0e0e0'; // Light gray for high contrast on dark backgrounds
+        }
+    }
+
+    /**
+     * Calculate appropriate sidebar item text color based on theme lightness
+     * Ensures WCAG AA compliance for sidebar navigation items
+     * @param {number} lightness - Theme lightness value (0-100)
+     * @returns {string} - Hex color value for sidebar item text
+     */
+    calculateSidebarItemTextColor(lightness) {
+        // For very light backgrounds (lightness > 70%), use dark text
+        if (lightness > 70) {
+            return '#2a2a2a'; // Dark text for high contrast on light backgrounds
+        }
+        // For medium backgrounds (lightness 40-70%), use medium contrast text
+        else if (lightness > 40) {
+            return '#4a4a4a'; // Medium dark text for balanced contrast
+        }
+        // For dark backgrounds (lightness < 40%), use light text
+        else {
+            return '#e8e8e8'; // Light text for high contrast on dark backgrounds
+        }
+    }
+
     reload_() {
         // debugger;
         const s = this.state;
@@ -121,6 +163,14 @@ export class ThemeService extends Service {
         this.root.style.setProperty('--primary-lightness', s.lig + '%');
         this.root.style.setProperty('--primary-alpha', s.alpha);
         this.root.style.setProperty('--primary-color', s.light_text ? 'white' : '#373e44');
+        
+        // Calculate and set dynamic sidebar text color based on lightness
+        const sidebarTextColor = this.calculateSidebarTextColor(s.lig);
+        this.root.style.setProperty('--window-sidebar-text-color', sidebarTextColor);
+        
+        // Calculate and set dynamic sidebar item text color based on lightness
+        const sidebarItemTextColor = this.calculateSidebarItemTextColor(s.lig);
+        this.root.style.setProperty('--window-sidebar-item-text-color', sidebarItemTextColor);
 
         // TODO: Should we debounce this to reduce traffic?
         this.#broadcastService.sendBroadcast('themeChanged', {
