@@ -101,6 +101,8 @@ pre {
     --window-sidebar-lightness: var(--primary-lightness);
     --window-sidebar-alpha: calc(min(1, 0.11 + var(--primary-alpha)));
     --window-sidebar-color: var(--primary-color);
+    --window-sidebar-text-color: #8f96a3;
+    --window-sidebar-item-text-color: #444444;
 
     --taskbar-hue: var(--primary-hue);
     --taskbar-saturation: var(--primary-saturation);
@@ -1218,7 +1220,7 @@ span.header-sort-icon img {
     margin: 0;
     font-weight: bold;
     font-size: 13px;
-    color: #8f96a3;
+    color: var(--window-sidebar-text-color);
     text-shadow: 1px 1px rgb(247 247 247 / 15%);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -1243,7 +1245,7 @@ span.header-sort-icon img {
     margin-top: 2px;
     padding: 4px;
     border-radius: 3px;
-    color: #444444;
+    color: var(--window-sidebar-item-text-color);
     font-size: 13px;
     cursor: pointer;
     transition: 0.15s background-color;
