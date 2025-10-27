@@ -1481,6 +1481,27 @@ span.header-sort-icon img {
     margin-top: 10px;
 }
 
+/* Alert type-specific styling with colored borders */
+.window-alert-info {
+    border-left: 4px solid #007bff;  /* Blue */
+}
+
+.window-alert-success {
+    border-left: 4px solid #28a745;  /* Green */
+}
+
+.window-alert-warning {
+    border-left: 4px solid #ffc107;  /* Yellow */
+}
+
+.window-alert-error {
+    border-left: 4px solid #dc3545;  /* Red */
+}
+
+.window-alert-question {
+    border-left: 4px solid #6c757d;  /* Gray */
+}
+
 .prompt-resp-button {
     margin-left: 10px;
 }

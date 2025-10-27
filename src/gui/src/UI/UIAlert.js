@@ -40,11 +40,33 @@ function UIAlert(options){
                 {label: i18n('ok'), value: true, type: 'primary'}
             ]
         }
+        // Normalize buttons: convert strings to objects
+        else if(options.buttons.length > 0){
+            options.buttons = options.buttons.map((btn, index) => {
+                // If already an object, use as-is
+                if(typeof btn === 'object' && btn !== null){
+                    return btn;
+                }
+                // Convert string to button object
+                return {
+                    label: btn,
+                    value: btn,
+                    type: index === 0 ? 'primary' : 'default'
+                };
+            });
+        }
 
-        // set body icon
-        options.body_icon = options.body_icon ?? window.icons['warning-sign.svg'];
-        if(options.type === 'success')
-            options.body_icon = window.icons['c-check.svg'];
+    // Map alert type to icon
+    const typeIconMap = {
+        'info': 'bell.svg',
+        'success': 'c-check.svg',
+        'warning': 'warning-sign.svg',
+        'error': 'danger.svg',
+        'question': 'reminder.svg'
+    };
+
+    // Set icon based on type, default to warning
+    options.body_icon = options.body_icon ?? window.icons[typeIconMap[options.type] || 'warning-sign.svg'];
 
         let santized_message = html_encode(options.message);
 
@@ -90,7 +112,13 @@ function UIAlert(options){
             draggable_body: options.draggable_body ?? true,
             allow_context_menu: false,
             show_in_taskbar: false,
-            window_class: 'window-alert',
+            window_class: (() => {
+                let windowClass = 'window-alert';
+                if (options.type && ['info', 'success', 'warning', 'error', 'question'].includes(options.type)) {
+                    windowClass += ` window-alert-${options.type}`;
+                }
+                return windowClass;
+            })(),
             dominant: true,
             body_content: h,
             width: 350,
