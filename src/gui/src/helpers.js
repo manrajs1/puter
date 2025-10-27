@@ -1737,7 +1737,7 @@ window.upload_items = async function(items, dest_path){
     let opid;
 
     if(dest_path == window.trash_path){
-        UIAlert('Uploading to trash is not allowed!');
+        UIAlert({type: 'error', message: 'Uploading to trash is not allowed!'});
         return;
     }
 
@@ -1825,6 +1825,7 @@ window.upload_items = async function(items, dest_path){
 
 window.empty_trash = async function(){
     const alert_resp = await UIAlert({
+        type: 'question',
         message: i18n('empty_trash_confirmation'),
         buttons:[
             {
