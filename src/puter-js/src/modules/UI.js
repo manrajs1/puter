@@ -621,8 +621,31 @@ class UI extends EventListener {
     }
 
     alert = function(message, buttons, options, callback) {
+        // Support both old parameter-based syntax and new object-based syntax
+        let alertMessage, alertButtons, alertOptions;
+        
+        // If first argument is an object (not array), use new syntax
+        if (typeof message === 'object' && message !== null && !Array.isArray(message)) {
+            alertMessage = message.message;
+            alertButtons = message.buttons;
+            alertOptions = {
+                type: message.type,
+                ...message.options
+            };
+        } 
+        // Otherwise, use old parameter-based syntax (backward compatible)
+        else {
+            alertMessage = message;
+            alertButtons = buttons;
+            alertOptions = options;
+        }
+        
         return new Promise((resolve) => {
-            this.#postMessageWithCallback('ALERT', resolve, { message, buttons, options });
+            this.#postMessageWithCallback('ALERT', resolve, { 
+                message: alertMessage, 
+                buttons: alertButtons, 
+                options: alertOptions 
+            });
         })
     }
 
