@@ -48,6 +48,13 @@ export default {
                     <option value="show">${i18n('clock_visible_show')}</option>
                 </select>
             </div>
+            <div class="settings-card">
+                <strong style="flex-grow:1;">Toolbar Auto-Hide</strong>
+                <select class="change-toolbar-autohide" style="margin-left: 10px; max-width: 300px;">
+                    <option value="enabled">Enabled</option>
+                    <option value="disabled">Disabled</option>
+                </select>
+            </div>
             <div class="settings-card" style="display: block; height: auto;">
                 <strong style="margin: 15px 0 30px; display: block;">${i18n('menubar_style')}</strong>
                 <div style="flex-grow:1; margin-top: 10px;">
@@ -101,6 +108,50 @@ export default {
         });
 
         window.change_clock_visible();
+
+        // Load toolbar auto-hide preference from cloud storage
+        puter.kv.get('toolbar_auto_hide').then(async (val) => {
+            if (val === 'enabled' || !val) {
+                // Default to enabled if no value is set
+                $el_window.find('.change-toolbar-autohide').val('enabled');
+                window.toolbar_auto_hide_enabled = true;
+            } else if (val === 'disabled') {
+                $el_window.find('.change-toolbar-autohide').val('disabled');
+                window.toolbar_auto_hide_enabled = false;
+                // Show toolbar if it's hidden
+                if (window.toolbar_is_hidden) {
+                    window.showToolbar();
+                }
+            }
+        });
+
+        // Handle toolbar auto-hide preference changes
+        $el_window.on('change', 'select.change-toolbar-autohide', function(e){
+            const value = this.value;
+            
+            // Save to cloud storage
+            puter.kv.set('toolbar_auto_hide', value);
+            
+            // Apply the change immediately
+            if (value === 'enabled') {
+                window.toolbar_auto_hide_enabled = true;
+                // Start the timer
+                window.resetToolbarHideTimer();
+                console.log('[Toolbar] Auto-hide enabled');
+            } else if (value === 'disabled') {
+                window.toolbar_auto_hide_enabled = false;
+                // Show toolbar if it's hidden
+                if (window.toolbar_is_hidden) {
+                    window.showToolbar();
+                }
+                // Clear any pending timers
+                if (window.toolbar_hide_timeout) {
+                    clearTimeout(window.toolbar_hide_timeout);
+                    window.toolbar_hide_timeout = null;
+                }
+                console.log('[Toolbar] Auto-hide disabled');
+            }
+        });
 
         puter.kv.get('menubar_style').then(async (val) => {
             if(val === 'system' || !val){

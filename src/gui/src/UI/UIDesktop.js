@@ -1151,6 +1151,76 @@ async function UIDesktop(options){
     // adjust window container to take into account the toolbar height
     $('.window-container').css('top', window.toolbar_height);
 
+    // ============================================
+    // Toolbar Auto-Hide Functions
+    // ============================================
+    
+    // Initialize toolbar state
+    window.toolbar_auto_hide_enabled = true; // Can be toggled by user preference (loaded from cloud storage below)
+    window.toolbar_is_hidden = false;
+    window.toolbar_hide_timeout = null;
+    window.toolbar_hide_delay = 2000; // 2 seconds
+    
+    // Load toolbar auto-hide preference from cloud storage
+    puter.kv.get('toolbar_auto_hide').then(async (val) => {
+        if (val === 'enabled' || !val) {
+            // Default to enabled if no value is set
+            window.toolbar_auto_hide_enabled = true;
+            window.resetToolbarHideTimer();
+        } else if (val === 'disabled') {
+            window.toolbar_auto_hide_enabled = false;
+            // Clear any pending timers
+            if (window.toolbar_hide_timeout) {
+                clearTimeout(window.toolbar_hide_timeout);
+                window.toolbar_hide_timeout = null;
+            }
+        }
+    });
+    
+    /**
+     * Hides the toolbar by sliding it up
+     * Only works if auto-hide is enabled
+     */
+    window.hideToolbar = function() {
+        if (!window.toolbar_auto_hide_enabled) return;
+        if (window.toolbar_is_hidden) return;
+        $('.toolbar').addClass('toolbar-hidden');
+        window.toolbar_is_hidden = true;
+        console.log('[Toolbar] Hidden');
+    };
+    
+    /**
+     * Shows the toolbar by sliding it down
+     */
+    window.showToolbar = function() {
+        if (!window.toolbar_is_hidden) return;
+        $('.toolbar').removeClass('toolbar-hidden');
+        window.toolbar_is_hidden = false;
+        console.log('[Toolbar] Shown');
+    };
+    
+    /**
+     * Resets the auto-hide timer
+     * Clears any existing timer and starts a new 2-second countdown
+     * Only works if auto-hide is enabled
+     */
+    window.resetToolbarHideTimer = function() {
+        if (!window.toolbar_auto_hide_enabled) return;
+        
+        // Clear existing timer if any
+        if (window.toolbar_hide_timeout) {
+            clearTimeout(window.toolbar_hide_timeout);
+            console.log('[Toolbar] Timer reset');
+        }
+        
+        // Start new timer
+        window.toolbar_hide_timeout = setTimeout(() => {
+            window.hideToolbar();
+        }, window.toolbar_hide_delay);
+        
+        console.log('[Toolbar] Timer started - will hide in ' + (window.toolbar_hide_delay / 1000) + ' seconds');
+    };
+
     // track: checkpoint
     //-----------------------------
     // GUI is ready to launch apps!
