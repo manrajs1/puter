@@ -81,6 +81,29 @@ const update_mouse_position = function(x, y){
     }
     window.mouseover_item_container = active_ic;
 
+    // ============================================
+    // Toolbar Auto-Hide: Mouse Proximity Detection
+    // ============================================
+    
+    // Only run auto-hide logic if the feature is enabled
+    if (window.toolbar_auto_hide_enabled) {
+        // Reveal zone: show toolbar when mouse is within 50px of top
+        const toolbar_reveal_zone = 50;
+        
+        // Check if mouse is near the top of the screen
+        if (window.mouseY < toolbar_reveal_zone) {
+            // Mouse is near top - show toolbar if hidden
+            if (window.showToolbar) {
+                window.showToolbar();
+            }
+        } else {
+            // Mouse is not near top - reset the hide timer
+            if (window.resetToolbarHideTimer) {
+                window.resetToolbarHideTimer();
+            }
+        }
+    }
+
 }
 
 export default update_mouse_position;
