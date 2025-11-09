@@ -780,6 +780,55 @@ window.show_or_hide_files = (item_containers) => {
         .removeClass(class_to_remove).addClass(class_to_add);
 }
 
+/**
+ * Toggles the visibility of desktop icons based on the user preference.
+ * 
+ * @function toggle_desktop_icons_visibility
+ * @memberof window
+ * 
+ * @description
+ * This function shows or hides all desktop icons (including the trash icon) by adding or removing
+ * the 'item-hidden' CSS class. The visibility state is determined by the 
+ * window.user_preferences.desktop_icons_visible preference.
+ * 
+ * When desktop_icons_visible is false, all desktop items will have the 'item-hidden' class added,
+ * which sets display: none. When true, the class is removed to show the icons.
+ * 
+ * This function only affects items on the desktop, not items in File Explorer windows.
+ * 
+ * @example
+ * // Hide desktop icons
+ * window.user_preferences.desktop_icons_visible = false;
+ * window.toggle_desktop_icons_visibility();
+ * 
+ * @example
+ * // Show desktop icons
+ * window.user_preferences.desktop_icons_visible = true;
+ * window.toggle_desktop_icons_visibility();
+ */
+window.toggle_desktop_icons_visibility = () => {
+    // Guard clause: ensure desktop element exists
+    const el_desktop = $('.desktop.item-container');
+    if (!el_desktop || el_desktop.length === 0) {
+        return;
+    }
+
+    // Get current preference state
+    const desktop_icons_visible = window.user_preferences.desktop_icons_visible;
+
+    // Query all desktop items (including trash)
+    const desktop_items = el_desktop.find('.item');
+
+    // Toggle visibility by adding or removing the item-hidden class
+    if (desktop_icons_visible) {
+        // Show icons: remove item-hidden class
+        desktop_items.removeClass('item-hidden');
+    } else {
+        // Hide icons: add item-hidden class
+        desktop_items.addClass('item-hidden');
+    }
+}
+
 window.create_folder = async(basedir, appendto_element)=>{
 	let dirname = basedir;
     let folder_name = 'New Folder';
