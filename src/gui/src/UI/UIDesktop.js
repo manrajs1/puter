@@ -706,13 +706,18 @@ async function UIDesktop(options){
     }
 
     // update local user preferences
+    const desktop_icons_visible_kv = await puter.kv.get('user_preferences.desktop_icons_visible');
     const user_preferences = {
         show_hidden_files: JSON.parse(await puter.kv.get('user_preferences.show_hidden_files')),
         language: await puter.kv.get('user_preferences.language'),
         clock_visible: await puter.kv.get('user_preferences.clock_visible'),
+        desktop_icons_visible: desktop_icons_visible_kv !== null ? JSON.parse(desktop_icons_visible_kv) : true,
     };
 
-    // update default apps
+    // Update preferences immediately so they're available for desktop initialization
+    window.update_user_preferences(user_preferences);
+
+    // update default apps (done asynchronously to avoid blocking desktop load)
     puter.kv.list('user_preferences.default_apps.*').then(async (default_app_keys) => {
         for(let key in default_app_keys){
             user_preferences[default_app_keys[key].substring(17)] = await puter.kv.get(default_app_keys[key]);
@@ -944,6 +949,19 @@ async function UIDesktop(options){
                         }
                     },
                     // -------------------------------------------
+                    // Hide/Show Desktop Icons
+                    // -------------------------------------------
+                    {
+                        html: (window.user_preferences.desktop_icons_visible ?? true) ? i18n('hide_desktop_icons') : i18n('show_desktop_icons'),
+                        onClick: function(){
+                            const current_value = window.user_preferences.desktop_icons_visible ?? true;
+                            window.mutate_user_preferences({
+                                desktop_icons_visible : !current_value,
+                            });
+                            window.toggle_desktop_icons_visibility();
+                        }
+                    },
+                    // -------------------------------------------
                     // -
                     // -------------------------------------------
                     '-',
@@ -1013,6 +1031,34 @@ async function UIDesktop(options){
     //-------------------------------------------
     if(!window.is_embedded && !window.is_fullpage_mode){
         refresh_item_container(el_desktop, {fadeInItems: true})
+
+        // Apply saved desktop icons visibility preference after items are loaded
+        // Use MutationObserver to detect when items are added to the desktop
+        const applyIconsVisibility = () => {
+            const items = $(el_desktop).find('.item');
+            if (items.length > 0) {
+                window.toggle_desktop_icons_visibility();
+                return true;
+            }
+            return false;
+        };
+
+        // Try immediately (in case items load very fast)
+        if (!applyIconsVisibility()) {
+            // If items not ready yet, observe DOM changes
+            const observer = new MutationObserver((mutations) => {
+                if (applyIconsVisibility()) {
+                    observer.disconnect();
+                }
+            });
+            observer.observe(el_desktop, { childList: true, subtree: true });
+
+            // Fallback timeout to ensure we don't observe forever
+            setTimeout(() => {
+                observer.disconnect();
+                window.toggle_desktop_icons_visibility();
+            }, 3000);
+        }
 
         // Show welcome window if user hasn't already seen it and hasn't directly navigated to an app 
         if(!window.url_paths[0]?.toLocaleLowerCase() === 'app' || !window.url_paths[1]){

@@ -99,7 +99,14 @@ if (window.user_preferences === null) {
         show_hidden_files: false,
         language: navigator.language.split("-")[0] || navigator.userLanguage || 'en',
         clock_visible: 'auto',
+        desktop_icons_visible: true,
     }
+}
+// Ensure desktop_icons_visible has a default value for existing users
+if (window.user_preferences.desktop_icons_visible === undefined) {
+    window.user_preferences.desktop_icons_visible = true;
+    // Persist the default value to localStorage
+    localStorage.setItem('user_preferences', JSON.stringify(window.user_preferences));
 }
 
 window.window_stack = []
